@@ -1,0 +1,8 @@
+export const SET_SECRET = "SET_SECRET";
+export const REMOVE_SECRET = "REMOVE_SECRET";
+export const SET_SHARDS = "SET_SHARDS";
+export const REMOVE_SHARDS = "REMOVE_SHARDS";
+export const SET_DECRYPTED_OBJS = "SET_DECRYPTED_OBJS";
+export const REMOVE_DECTYPTED_OBJS = "REMOVE_DECTYPTED_OBJS";
+export const SET_CID = "SET_CID";
+export const REMOVE_CID = "REMOVE_CID";
