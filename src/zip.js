@@ -1,13 +1,10 @@
-import JSZip from "jszip";
-import { saveAs } from "file-saver";
-// import Cryptify from 'cryptify';
+
 import AES from "crypto-js/aes";
 import UTF8 from "crypto-js/enc-utf8";
 
 import secrets from "@skyekiwi/secrets";
 
-import { fetchCid, listUploads, storeData } from "./db";
-import { getZipFilesContent } from "./helpers";
+import { fetchCid, storeData } from "./db";
 
 const fileTobase64 = (file) => {
   return new Promise((resolve) => {
@@ -96,7 +93,7 @@ export const combineShards = (shares) => {
   if (typeof shares !== "object") {
     throw new Error("Array Object Required to combined shares");
   }
-  console.log(shares);
+  // console.log(shares);
   // Shares is an array of shared secrets
   return secrets.combine(shares);
 };

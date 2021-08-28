@@ -1,118 +1,56 @@
-import logo from "./logo.svg";
+
 import "./App.css";
 import React from "react";
 
-import { createZip, fetchAndDecrypt } from "./zip";
+import { initWallet, WalletAdapter } from "./solana/wallet";
+import messageService from "./solana/messages";
+import { Connection } from "@solana/web3.js";
 
-import { useStore } from "react-redux";
-
-import Upload from './components/Upload';
-import SecretsComponent from './components/Secrets';
-
-import { getType, decodeBase64 } from './helpers';
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import RegistrationForm from "./components/RegistrationForm";
+import Navbar from "./components/Navbar";
+import Notification from "./components/Notification";
+import Certificate from "./components/Certificate";
+import Home from "./components/Home";
 
 function App() {
-  
-  const store = useStore();
-  const [state, setState] = React.useState({
-    cid: "",
-    decryptedFiles: null,
-    global: null,
-    loading: false
-  });
-
-  const updateLocalGlobalState = () => {
-    const currentState = store.getState();
-    setState({
-      ...state,
-      global: {
-        ...currentState["global"]
-      }
-    })
-  }
-
-  const setLoading = (newLoading) => {
-    setState({
-      ...state,
-      loading: newLoading
-    })
-  }
-
+  // Test Area
+  const conn = React.useRef();
+  const [myWallet, setMyWallet] = React.useState();
   React.useEffect(() => {
-    updateLocalGlobalState()
-  }, [state.cid])
+    // initWallet().then(([connection, wallet]) => {
+    //   console.log(connection, wallet)
+    //   conn.current = connection;
+    //   setMyWallet(wallet);
+    //   console.log(wallet.publicKey)
+    // })
+  }, []);
 
-  const handleChange = (e) => {
-    setState({
-      ...state,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleGet = async () => {
-    
-    const { cid, global: {shards} } = state;
-    
-    console.log(shards);
-    setLoading(true);
-
-    const decryptedJSON = await fetchAndDecrypt(shards.slice(0,2), cid);
-    
-    setState({
-      ...state,
-      loading: false,
-      decryptedFilesJSON: decryptedJSON
+  const connectWallet = () => {
+    initWallet().then(([connection, wallet]) => {
+      console.log(connection, wallet)
+      conn.current = connection;
+      setMyWallet(wallet);
+      console.log(wallet.publicKey)
     })
-  };
-
-  
-  const createJSONObjectView = () => {
-    const {decryptedFilesJSON} = state; 
-    const finalViewObj = [];
-    if(decryptedFilesJSON) {
-      Object.keys(decryptedFilesJSON).forEach((key) => {
-        finalViewObj.push(<p>Filename: {key}</p>);
-        switch(getType(key.split('.').pop())) {
-          case "image": finalViewObj.push(<img src={decryptedFilesJSON[key]} alt={key} className="image"/>); break;
-          case "text": finalViewObj.push(<p>{decodeBase64(decryptedFilesJSON[key].split(',').pop())}</p>); break;
-          default:
-        }
-      })
-    }
-    return finalViewObj;
   }
 
   return (
-    <div className="container">
-      <br />
-      <SecretsComponent />
-      <br />
-      <Upload />
-      <br />
-      <div>
-        <input
-          type="text"
-          name="cid"
-          placeholder="Input cid to fetch"
-          onChange={(e) => {
-            handleChange(e);
-          }}
-        />
-        <button onClick={() => handleGet()}>Fetch</button>
-      </div>
-      <br />
-      
-      <div>
-        {
-          state.loading ? <p>Loading ...</p> : <p>Loaded</p>
-        }
-      </div>
-      <div>
-        {
-          createJSONObjectView()
-        }
-      </div>
-    </div>
+      <Router>
+        <Navbar connectWallet={connectWallet} />
+        <Switch>
+          <Route path={`/certificate/:cid`}>
+            <Certificate />
+          </Route>
+          <Route path="/registration">
+            <RegistrationForm />
+          </Route>
+          <Route path="/">
+            <Home />
+          </Route>
+        </Switch>
+        <Notification />
+      </Router>
   );
 }
 

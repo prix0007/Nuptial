@@ -37,10 +37,7 @@
   }
 }
 
-.image {
-  max-height: 200px;
-  max-width: 150px;
-}
+
 .text {
  word-wrap: break-word;
 }
@@ -48,4 +45,27 @@
   margin: 5px 0px;
   background-color: black;
   height: 1px;
+}
+
+.border {
+  border: 1px solid #000;
+  border-radius: 5px;
+}
+.notification-container {
+  position: fixed;
+  right: 0;
+  top: 20px;
+  z-index: 100;
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.cert-image {
+  max-width: 100%;
+}
+
+.card {
+  background-color: rgba(0,100,100,0.2);
 }

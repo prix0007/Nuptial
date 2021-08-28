@@ -1,21 +1,16 @@
 import React from 'react';
 
 import {
-    createZip,
-    createRandomKey,
-    createShards
+    createZip
 } from '../zip';
 
 import {
-    setCid,
-    setSecret,
-    setShards
+    setCid
 } from '../actions';
 
 import {
     useDispatch, useStore
 } from 'react-redux';
-import Secrets from './Secrets';
 
 const Upload = () => {
 
@@ -47,7 +42,7 @@ const Upload = () => {
         
     }, [uploadState.files])
 
-    const onChangeFile = async (e) => {
+    const onChangeFile = async (e) => { 
         const files = e.target.files;
         // const filesKeyArr = Object.keys(files);
         console.log(files);

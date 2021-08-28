@@ -7,6 +7,8 @@ import {
   REMOVE_DECTYPTED_OBJS,
   REMOVE_SECRET,
   REMOVE_SHARDS,
+  ADD_NOTIFICATION,
+  REMOVE_NOTIFICATION
 } from "../reducers/types";
 
 export const setCid = (cid) => {
@@ -53,4 +55,17 @@ export const removeShards = () => {
     return {
         type: REMOVE_SHARDS,
     }
+}
+export const addNotification = (notification) => {
+  return {
+    payload: notification,
+    type: ADD_NOTIFICATION
+  }
+}
+
+export const removeNotification = (index) => {
+  return {
+    payload: index,
+    type: REMOVE_NOTIFICATION
+  }
 }
