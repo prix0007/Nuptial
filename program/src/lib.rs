@@ -8,28 +8,37 @@ use solana_program::{
     program_error::ProgramError,
     pubkey::Pubkey,
 };
-use std::io::ErrorKind::InvalidData;
+// use std::io::ErrorKind::InvalidData;
 
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
-pub struct ChatMessage {
-    pub archive_id: String,
+pub struct Certificate {
+    pub cid: String,
+    pub bride: String,
+    pub groom: String,
+    pub shard: String,
     pub created_on: String
 }
 
-// example arweave tx (length 43)
-// 1seRanklLU_1VTGkEk7P0xAwMJfA7owA1JHW5KyZKlY
-// ReUohI9tEmXQ6EN9H9IkRjY9bSdgql_OdLUCOeMEte0
-const DUMMY_TX_ID: &str = "0000000000000000000000000000000000000000000";
+// example ipns cid (length 59)
+// bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi
+
+const DUMMY_CID: &str = "00000000000000000000000000000000000000000000000000000000000";
+
+// example name (length 32 characters)  
+const DUMMY_NAME: &str = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+
+// exmaple shard (length 163 characters)
+const DUMMY_SHARD: &str = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+
 const DUMMY_CREATED_ON: &str = "0000000000000000"; // milliseconds, 16 digits
-pub fn get_init_chat_message() -> ChatMessage {
-    ChatMessage{ archive_id: String::from(DUMMY_TX_ID), created_on: String::from(DUMMY_CREATED_ON) }
-}
-pub fn get_init_chat_messages() -> Vec<ChatMessage> {
-    let mut messages = Vec::new();
-    for _ in 0..20 {
-        messages.push(get_init_chat_message());
+pub fn get_init_certificate() -> Certificate {
+    Certificate{ 
+        cid: String::from(DUMMY_CID),
+        bride: String::from(DUMMY_NAME),
+        groom: String::from(DUMMY_NAME),
+        shard: String::from(DUMMY_SHARD),
+        created_on: String::from(DUMMY_CREATED_ON) 
     }
-    return messages;
 }
 
 entrypoint!(process_instruction);
@@ -47,39 +56,18 @@ pub fn process_instruction(
 
     sol_log_compute_units();
 
-    let instruction_data_message = ChatMessage::try_from_slice(instruction_data).map_err(|err| {
+    let instruction_data_message = Certificate::try_from_slice(instruction_data).map_err(|err| {
         msg!("Attempt to deserialize instruction data has failed. {:?}", err);
         ProgramError::InvalidInstructionData
     })?;
     msg!("Instruction_data message object {:?}", instruction_data_message);
 
-    let mut existing_data_messages = match <Vec<ChatMessage>>::try_from_slice(&account.data.borrow_mut()) {
-        Ok(data) => data,
-        Err(err) => {
-            if err.kind() == InvalidData {
-                msg!("InvalidData so initializing account data");
-                get_init_chat_messages()
-            } else {
-                panic!("Unknown error decoding account data {:?}", err)
-            }
-        }
-    };
-    let index = existing_data_messages.iter().position(|p| p.archive_id == String::from(DUMMY_TX_ID)).unwrap(); // find first dummy data entry
-    msg!("Found index {}", index);
-    existing_data_messages[index] = instruction_data_message; // set dummy data to new entry
-    let updated_data = existing_data_messages.try_to_vec().expect("Failed to encode data."); // set messages object back to vector data
-    msg!("Final existing_data_messages[index] {:?}", existing_data_messages[index]);
-
-    // data algorithm for storing data into account and then archiving into Arweave
-    // 1. Each ChatMessage object will be prepopulated for txt field having 43 characters (length of a arweave tx).
-    // Each ChatMessageContainer will be prepopulated with 10 ChatMessage objects with dummy data.
-    // 2. Client will submit an arweave tx for each message; get back the tx id; and submit it to our program.
-    // 3. This tx id will be saved to the Solana program and be used for querying back to arweave to get actual data.
     let data = &mut &mut account.data.borrow_mut();
     msg!("Attempting save data.");
-    data[..updated_data.len()].copy_from_slice(&updated_data);    
-    let saved_data = <Vec<ChatMessage>>::try_from_slice(data)?;
-    msg!("ChatMessage has been saved to account data. {:?}", saved_data[index]);
+    msg!("Instruction Length{:?}", instruction_data.len());
+    data[..instruction_data.len()].copy_from_slice(&instruction_data);    
+    let saved_data = Certificate::try_from_slice(data)?;
+    msg!("Certificate has been saved to account data. {:?}", saved_data);
     sol_log_compute_units();
 
     msg!("End program.");
@@ -98,8 +86,8 @@ mod test {
         let program_id = Pubkey::default();
         let key = Pubkey::default();
         let mut lamports = 0;
-        let messages = get_init_chat_messages(); 
-        let mut data = messages.try_to_vec().unwrap();
+        let certificate = get_init_certificate(); 
+        let mut data = certificate.try_to_vec().unwrap();
         let owner = Pubkey::default();
         let account = AccountInfo::new(
             &key,
@@ -112,26 +100,50 @@ mod test {
             Epoch::default(),
         );
         
-        let archive_id = "abcdefghijabcdefghijabcdefghijabcdefghijabc";
+        let cid = "bafybeigjot52ohlxifpzaur5gfpcg4utccvhspygpz2pnpr7yrorrmopca";
         let created_on = "0001621449453837";
-        let instruction_data_chat_message = ChatMessage{ archive_id: String::from(archive_id), created_on: String::from(created_on) };
-        let instruction_data = instruction_data_chat_message.try_to_vec().unwrap();
+        let shard = "801308886c9b5e7472b210e01731dde36e103056dfe903f5bf3a2138ac6f393c0a4e6281966f156e04db3994d9003377766bbd423081d1c452d3976badb16362b260e1de62af78761a8dbe2a889f67279c0";
+        let bride = "Jane DoeXXXXXXXXXXXXXXXXXXXXXXXX";
+        let groom = "John DoeXXXXXXXXXXXXXXXXXXXXXXXX";
+        let instruction_data_certificate= Certificate{ 
+            cid: String::from(cid),
+            bride: String::from(bride),
+            groom: String::from(groom),
+            shard: String::from(shard),
+            created_on: String::from(created_on) 
+        };
+        let instruction_data = instruction_data_certificate.try_to_vec().unwrap();
 
         let accounts = vec![account];
 
         process_instruction(&program_id, &accounts, &instruction_data).unwrap();
-        let chat_messages = &<Vec<ChatMessage>>::try_from_slice(&accounts[0].data.borrow())
-        .unwrap()[0];
-        let test_archive_id = &chat_messages.archive_id;
-        let test_created_on = &chat_messages.created_on;
-        println!("chat message {:?}", &chat_messages);
+        let certificate = &Certificate::try_from_slice(&accounts[0].data.borrow()).unwrap();
+        let test_cid = &certificate.cid;
+        let test_created_on = &certificate.created_on;
+        let test_bride = &certificate.bride;
+        let test_groom = &certificate.groom;
+        let test_shard = &certificate.shard;
+        println!("chat message {:?}", &certificate);
+
         // I added first data and expect it to contain the given data
         assert_eq!(
-            String::from(archive_id).eq(test_archive_id),
+            String::from(cid).eq(test_cid),
             true
         );
         assert_eq!(
             String::from(created_on).eq(test_created_on),
+            true
+        );
+        assert_eq!(
+            String::from(bride).eq(test_bride),
+            true
+        );
+        assert_eq!(
+            String::from(groom).eq(test_groom),
+            true
+        );
+        assert_eq!(
+            String::from(shard).eq(test_shard),
             true
         );
     }

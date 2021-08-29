@@ -3,14 +3,16 @@ import React from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-import Gender from './Gender';
+import Gender from "./Gender";
+
+import certificateService from "../solana/certificate";
 
 import { addNotification, setShards, setCid } from "../actions";
 import { useDispatch } from "react-redux";
 
-import {
-  processJSONfromFORM
-} from '../helpers';
+import { Redirect } from 'react-router-dom';
+
+import { processJSONfromFORM } from "../helpers";
 
 const INIT = {
   bride: {
@@ -48,12 +50,14 @@ const INIT = {
   year_of_marriage: "",
   place: "San Deigo, Auckland, Australia",
   files: null,
-  errors: null
+  errors: null,
 };
 
-const RegistrationForm = () => {
+const RegistrationForm = ({ connection, wallet, certificateAddr }) => {
   const dispatch = useDispatch();
   const [formState, setFormState] = React.useState({ ...INIT });
+
+  const [registered, setRegistered] = React.useState(false);
 
   const addWitness = () => {
     setFormState({
@@ -142,7 +146,7 @@ const RegistrationForm = () => {
   //     },
   //     groom: {
 
-  //     }, 
+  //     },
   //     witness: [],
   //     year_of_marriage: null,
   //     place: null
@@ -154,40 +158,94 @@ const RegistrationForm = () => {
   //     ...formState,
   //     errors
   //   })
-  // } 
+  // }
 
   const setGender = (type, newGender, index) => {
     const newState = formState;
-    if(index === undefined){
-      newState[type]["public"]["gender"] = newGender
+    if (index === undefined) {
+      newState[type]["public"]["gender"] = newGender;
     } else {
-      newState["witnesses"][index]["public"]["gender"] = newGender
+      newState["witnesses"][index]["public"]["gender"] = newGender;
     }
     setFormState({
-      ...newState
-    })
-  }
+      ...newState,
+    });
+  };
 
   const submitForUpload = async () => {
-    const {status, cid, shards} = await processJSONfromFORM(formState);
-    // console.log(cid, shards);
-    if(status){
-      dispatch(addNotification({
-        text: "Congratulations you are Registered Successfully. May your bond live forever.",
-        type: "success"
-      }))
+    if (wallet === null) {
+      dispatch(
+        addNotification({
+          text: "Connect to your wallet first.",
+          type: "danger",
+        })
+      );
+      return;
+    }
+
+    if (connection.current === undefined || connection.current === null) {
+      dispatch(
+        addNotification({
+          text: "Connect not established. Try Again Connecting your wallet 🔃🔃",
+          type: "danger",
+        })
+      );
+    }
+
+    if (certificateAddr === "" || certificateAddr === undefined) {
+      dispatch(
+        addNotification({
+          text: "Certificate address is not yet generated. Make sure to approve transaction. 🔔🔔",
+          type: "danger",
+        })
+      );
+    }
+
+    console.log(certificateAddr, wallet, connection.current);
+
+    const { status, cid, shards } = await processJSONfromFORM(formState);
+    console.log(cid, shards);
+
+    if (status) {
+      dispatch(
+        addNotification({
+          text: "Posting Transaction to Blockchain. Approve the transaction if it asks.",
+          type: "info",
+        })
+      );
+      const res = await certificateService.sendCertificate(
+        connection.current,
+        wallet,
+        certificateAddr,
+        cid,
+        bride.public.name,
+        groom.public.name,
+        shards[0]
+      );
+
+      console.log(res);
+      dispatch(
+        addNotification({
+          text: "Congratulations you are Registered Successfully. May your bond live forever.",
+          type: "success",
+        })
+      );
       dispatch(setCid(cid));
       dispatch(setShards(shards));
+      setRegistered(true);
     } else {
-      dispatch(addNotification({
-        text: "Some Error Occured while Registering... Try Again Later",
-        type: "danger"
-      }))
+      dispatch(
+        addNotification({
+          text: "Some Error Occured while Registering... Try Again Later",
+          type: "danger",
+        })
+      );
     }
-  }
+  };
 
   return (
     <div className="container pt-4 pb-4">
+      {registered && <Redirect to="/" />}
       <h1 className="title mt-4 mb-4">Registration Form</h1>
       <div className="columns">
         <div className="column is-half">
@@ -202,7 +260,7 @@ const RegistrationForm = () => {
                 value={bride.public.name}
               />
               <span className="icon is-small is-left">
-                <i class="far fa-user"></i>
+                <i className="far fa-user"></i>
               </span>
               <span className="icon is-small is-right">
                 <i className="fas fa-check fa-xs"></i>
@@ -220,14 +278,14 @@ const RegistrationForm = () => {
                 value={bride.public.age}
               />
               <span className="icon is-small is-left">
-                <i class="fas fa-level-up-alt"></i>
+                <i className="fas fa-level-up-alt"></i>
               </span>
               <span className="icon is-small is-right">
                 <i className="fas fa-check fa-xs"></i>
               </span>
             </div>
           </div>
-         
+
           <div className="field">
             <label className="label">Bride's Identification Number</label>
             <div className="control has-icons-left has-icons-right">
@@ -241,10 +299,10 @@ const RegistrationForm = () => {
                 value={bride.private.identification_no}
               />
               <span className="icon is-small is-left">
-                <i class="fas fa-signature"></i>
+                <i className="fas fa-signature"></i>
               </span>
               <span className="icon is-small is-right">
-                <i class="fas fa-signature"></i>
+                <i className="fas fa-signature"></i>
               </span>
             </div>
           </div>
@@ -261,7 +319,7 @@ const RegistrationForm = () => {
                 value={groom.public.name}
               />
               <span className="icon is-small is-left">
-                <i class="far fa-user"></i>
+                <i className="far fa-user"></i>
               </span>
               <span className="icon is-small is-right">
                 <i className="fas fa-check fa-xs"></i>
@@ -279,7 +337,7 @@ const RegistrationForm = () => {
                 value={groom.public.age}
               />
               <span className="icon is-small is-left">
-                <i class="fas fa-level-up-alt"></i>
+                <i className="fas fa-level-up-alt"></i>
               </span>
               <span className="icon is-small is-right">
                 <i className="fas fa-check fa-xs"></i>
@@ -299,7 +357,7 @@ const RegistrationForm = () => {
                 value={groom.private.identification_no}
               />
               <span className="icon is-small is-left">
-                <i class="fas fa-signature"></i>
+                <i className="fas fa-signature"></i>
               </span>
               <span className="icon is-small is-right">
                 <i className="fas fa-check fa-xs"></i>
@@ -328,7 +386,7 @@ const RegistrationForm = () => {
                     value={witness.public.name}
                   />
                   <span className="icon is-small is-left">
-                    <i class="far fa-user"></i>
+                    <i className="far fa-user"></i>
                   </span>
                   <span className="icon is-small is-right">
                     <i className="fas fa-check fa-xs"></i>
@@ -348,15 +406,15 @@ const RegistrationForm = () => {
                     value={witness.public.age}
                   />
                   <span className="icon is-small is-left">
-                    <i class="fas fa-level-up-alt"></i>
+                    <i className="fas fa-level-up-alt"></i>
                   </span>
                   <span className="icon is-small is-right">
                     <i className="fas fa-check fa-xs"></i>
                   </span>
                 </div>
               </div>
-              <Gender 
-                activeGender={witness.public.gender} 
+              <Gender
+                activeGender={witness.public.gender}
                 type={"witness"}
                 idx={index}
                 setGender={setGender}
@@ -380,7 +438,7 @@ const RegistrationForm = () => {
                     value={witness.private.identification_no}
                   />
                   <span className="icon is-small is-left">
-                    <i class="fas fa-signature"></i>
+                    <i className="fas fa-signature"></i>
                   </span>
                   <span className="icon is-small is-right">
                     <i className="fas fa-check fa-xs"></i>
@@ -400,7 +458,7 @@ const RegistrationForm = () => {
             onChange={(date) => setDate(date)}
           />
           <span className="icon is-small is-left">
-            <i class="fas fa-calendar-day"></i>
+            <i className="fas fa-calendar-day"></i>
           </span>
           <span className="icon is-small is-right">
             <i className="fas fa-check fa-xs"></i>
@@ -418,7 +476,7 @@ const RegistrationForm = () => {
             value={place}
           />
           <span className="icon is-small is-left">
-            <i class="fas fa-place-of-worship"></i>
+            <i className="fas fa-place-of-worship"></i>
           </span>
           <span className="icon is-small is-right">
             <i className="fas fa-check fa-xs"></i>
@@ -451,8 +509,10 @@ const RegistrationForm = () => {
             })}
         </label>
       </div>
-
-      <button className="button is-primary" onClick={() => submitForUpload()}>Get Registered</button>
+      <p className="is-size-6 mb-3">Current Certificate Address: {certificateAddr}</p>
+      <button className="button is-primary" onClick={() => submitForUpload()}>
+        Get Registered
+      </button>
     </div>
   );
 };

@@ -15,7 +15,7 @@ export interface WalletAdapter extends EventEmitter {
     disconnect: () => any;
   }
 
-const cluster = "http://localhost:8899";
+const cluster = "https://api.devnet.solana.com";
 const connection = new Connection(cluster, "confirmed");
 const wallet: WalletAdapter = new Wallet("https://www.sollet.io", cluster);
 

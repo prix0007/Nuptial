@@ -8,7 +8,9 @@ import {
   REMOVE_SECRET,
   REMOVE_SHARDS,
   ADD_NOTIFICATION,
-  REMOVE_NOTIFICATION
+  REMOVE_NOTIFICATION,
+  SET_CERTIFICATE,
+  REMOVE_CERTIFICATE
 } from "../reducers/types";
 
 export const setCid = (cid) => {
@@ -67,5 +69,18 @@ export const removeNotification = (index) => {
   return {
     payload: index,
     type: REMOVE_NOTIFICATION
+  }
+}
+
+export const setCertificate = (certificate) => {
+  return {
+    payload: certificate,
+    type: SET_CERTIFICATE
+  }
+}
+
+export const removeCertificate = () => {
+  return {
+    type: REMOVE_CERTIFICATE
   }
 }

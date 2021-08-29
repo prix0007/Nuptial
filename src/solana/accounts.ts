@@ -27,18 +27,19 @@ export async function getChatMessageAccountPubkey(
     }
   }
   console.log("start creating new chat account");
-  const CHAT_SEED = "chat" + Math.random().toString();
+  const CERTIFICATE_SEED = "certificate" + Math.random().toString();
   chatAccountPubkey = await PublicKey.createWithSeed(
     wallet.publicKey,
-    CHAT_SEED,
+    CERTIFICATE_SEED,
     programId
   );
   console.log("new chat account pubkey", chatAccountPubkey.toBase58());
+  console.log("Space require: ", space);
   const lamports = await connection.getMinimumBalanceForRentExemption(space);
   const instruction = SystemProgram.createAccountWithSeed({
     fromPubkey: wallet.publicKey,
     basePubkey: wallet.publicKey,
-    seed: CHAT_SEED,
+    seed: CERTIFICATE_SEED,
     newAccountPubkey: chatAccountPubkey,
     lamports,
     space,

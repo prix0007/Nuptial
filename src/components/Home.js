@@ -7,6 +7,8 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 import { Link } from "react-router-dom";
 
+import { programId } from "../solana/program";
+
 dayjs.extend(relativeTime);
 
 const Home = () => {
@@ -21,45 +23,63 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="container">
-      <div class="columns">
+    <div className="container p-2">
+      <div className=" mt-5 mb-3">
+        <p className="is-title is-size-3">
+          {" "}
+          All Marriage Certificates
+        </p>
+        <div className="is-subtitle is-size-5	">
+          Solana Executor Contract:
+          <a
+            href={`https://explorer.solana.com/address/${programId.toBase58()}?cluster=devnet`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {" "}
+            {programId.toBase58()}
+          </a>
+        </div>
+        <span className="tag">
+          Connect to your wallet to view if you have any certificates
+        </span>
+      </div>
+      <div className="columns is-flex is-flex-wrap-wrap	">
         {curCerts.map((certMeta) => {
           return (
-            <div class="column is-one-quarter" key={certMeta.cid}>
-              <Link
-                to={`/certificate/${certMeta.cid}`}
-              >
-                <div class="card">
-                  <div class="card-image">
-                    <figure class="image is-4by3">
+            <div className="column is-one-quarter" key={certMeta.cid}>
+              <Link to={`/certificate/${certMeta.cid}`}>
+                <div className="card">
+                  <div className="card-image">
+                    <figure className="image is-4by3">
                       <img
                         src="https://image.flaticon.com/icons/png/512/187/187868.png"
                         alt="Placeholder Mix"
                       />
                     </figure>
                   </div>
-                  <div class="card-content">
-                    <div class="media">
-                      <div class="media-left">
-                        <figure class="image is-48x48">
+                  <div className="card-content">
+                    <div className="media">
+                      <div className="media-left">
+                        <figure className="image is-48x48">
                           <img
                             src="https://image.flaticon.com/icons/png/512/3381/3381663.png"
                             alt="Placeholder Mix"
                           />
                         </figure>
                       </div>
-                      <div class="media-content">
-                        <p class="title is-6">{certMeta.cid}</p>
-                        <p class="subtitle is-6">
+                      <div className="media-content">
+                        <p className="title is-6">{certMeta.cid}</p>
+                        <p className="subtitle is-6">
                           Created @{dayjs(certMeta.created).fromNow()}
                         </p>
                       </div>
                     </div>
 
-                    <div class="content">
+                    <div className="content">
                       File Size: <strong> {certMeta.dagSize} bytes </strong>
                     </div>
-                    <div class="content">
+                    <div className="content">
                       Total Pins: <strong> {certMeta.pins.length} </strong>
                     </div>
                   </div>

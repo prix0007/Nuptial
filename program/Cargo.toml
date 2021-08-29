@@ -1,8 +1,8 @@
 
 [package]
-name = "chat-app-program"
+name = "certificate-on-chain-marriage-program"
 version = "0.0.1"
-description = "Example template program written in Rust"
+description = "Certificate program written in Rust"
 authors = ["Solana Maintainers <maintainers@solana.com>"]
 repository = "https://github.com/solana-labs/solana"
 license = "Apache-2.0"
@@ -22,5 +22,5 @@ solana-program-test = "=1.6.6"
 solana-sdk = "=1.6.6"
 
 [lib]
-name = "chatappprogram"
+name = "certificateappprogram"
 crate-type = ["cdylib", "lib"]
