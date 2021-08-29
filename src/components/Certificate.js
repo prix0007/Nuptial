@@ -23,6 +23,8 @@ const Certificate = () => {
 
   const [isDecrpted, setDecrypted] = React.useState(false);
 
+  const [loading, setLoading] = React.useState(false);
+  
   const globalShards = useSelector((state) => state.global.shards);
 
   const fetchData = async (cid) => {
@@ -33,7 +35,7 @@ const Certificate = () => {
     console.log("JSON: ", JSON.parse(plainText));
     const JSONCertificate = JSON.parse(plainText);
     setCertificate(JSONCertificate);
-
+    setLoading(false);
     dispatch(setShards([JSONCertificate["secret"]]));
   };
 
@@ -101,8 +103,11 @@ const Certificate = () => {
 
   const renderView = () => {
     if (isIPFS.cid(cid)) {
-      if (certificate === null) {
-        fetchData(cid);
+      if (certificate === null ) {
+        if(loading === false){
+          setLoading(true);
+          fetchData(cid);
+        }
         return <p className="title">Loading../..\ Certificate</p>;
       } else {
         return <div className="columns">{makePublicData()}{renderPrivateData()}</div>;
