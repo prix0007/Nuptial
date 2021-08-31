@@ -28,13 +28,14 @@ const Certificate = () => {
   const globalShards = useSelector((state) => state.global.shards);
 
   const fetchData = async (cid) => {
+    // console.log("Fetch Data Triggered");
     const fetchedData = await fetchCid(cid);
     // console.log(fetchedData);
     const plainText = await fetchedData[0].text();
     // console.log("Plain Text: ", plainText);
-    console.log("JSON: ", JSON.parse(plainText));
+    // console.log("JSON: ", JSON.parse(plainText));
     const JSONCertificate = JSON.parse(plainText);
-    setCertificate(JSONCertificate);
+    setCertificate({...JSONCertificate});
     setLoading(false);
     dispatch(setShards([JSONCertificate["secret"]]));
   };
@@ -47,32 +48,32 @@ const Certificate = () => {
     const { groom, bride, witnesses, year_of_marriage, place } = publicData;
 
     views.push(
-      <div class="card column is-half mb-5">
-        <div class="card-image">
+      <div className="card column is-half mb-5" key="main">
+        <div className="card-image">
           <img
             className="cert-image"
             src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8"
             alt="Placeholder marriage"
           />
         </div>
-        <div class="card-content">
-          <div class="media">
-            <div class="media-left">
-              <figure class="image is-48x48">
+        <div className="card-content">
+          <div className="media">
+            <div className="media-left">
+              <figure className="image is-48x48">
                 <img
                   src="https://image.flaticon.com/icons/png/512/3656/3656836.png"
                   alt="Placeholder Icon"
                 />
               </figure>
             </div>
-            <div class="media-content">
-              <p class="title is-4">
+            <div className="media-content">
+              <p className="title is-4">
                 {groom["name"]} and {bride["name"]}
               </p>
             </div>
           </div>
 
-          <div class="content">
+          <div className="content">
             <p>
               were bind is the bond of marriage and we are glad to view this as
               their everlasting bond in life and always present on blockchain.
@@ -81,7 +82,7 @@ const Certificate = () => {
               <p>
                 Their marriage is witnessed by{" "}
                 {witnesses.map((witness) => (
-                  <span>{witness.name}</span>
+                  <span key={witness.name}>{witness.name}</span>
                 ))}
               </p>
             )}
@@ -169,7 +170,7 @@ const Certificate = () => {
     return !isDecrpted && (
       <div className="is-flex mb-3">
         <textarea
-          class="textarea is-primary"
+          className="textarea is-primary"
           type="text"
           placeholder="Enter security shard to view private data."
           value={inputShard}
@@ -187,6 +188,8 @@ const Certificate = () => {
     );
   };
 
+  
+
   const renderPrivateData = () => {
     if(!certificate) return;
     const { private: priv } = certificate;
@@ -196,8 +199,8 @@ const Certificate = () => {
         <div className="is-flex is-flex-direction-column column is-half">
           <p className="is-size-5 has-text-primary">Private Data in this Certificate</p>
           <div className="card">
-            <div class="card-content">
-              <div class="content">
+            <div className="card-content">
+              <div className="content">
                 <h4>
                   Bride Identification Number:{" "}
                   {priv["bride"]["identification_no"]}
@@ -206,8 +209,8 @@ const Certificate = () => {
             </div>
           </div>
           <div className="card">
-            <div class="card-content">
-              <div class="content">
+            <div className="card-content">
+              <div className="content">
                 <h4>
                   Groom Identification Number:{" "}
                   {priv["groom"]["identification_no"]}
@@ -218,8 +221,8 @@ const Certificate = () => {
           {priv["witnesses"].map((witness, index) => {
             return (
               <div className="card" key={`witness-priv-${index}`}>
-                <div class="card-content">
-                  <div class="content">
+                <div className="card-content">
+                  <div className="content">
                     <h4>
                       Witness {index + 1} Identification No. :{" "}
                       {witness["identification_no"]}
@@ -233,16 +236,16 @@ const Certificate = () => {
             switch (getType(key.split(".").pop())) {
               case "image":
                 return  <div className="card" key={`file-priv-${index}`}>
-                  <div class="card-content">
-                    <div class="media">
+                  <div className="card-content">
+                    <div className="media">
                         <img src={priv["files"][key]} alt={key} className="image" /> 
                       </div>
                     </div>
                    </div>
               case "text":
                   return <div className="card" key={`file-priv-${index}`}>
-                  <div class="card-content">
-                    <div class="media">
+                  <div className="card-content">
+                    <div className="media">
                       <p>{decodeBase64(priv["files"][key].split(",").pop())}</p>
                       </div>
                     </div>

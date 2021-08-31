@@ -1,5 +1,7 @@
 import React from "react";
 
+import { saveAs} from 'file-saver';
+
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -160,6 +162,23 @@ const RegistrationForm = ({ connection, wallet, certificateAddr }) => {
   //   })
   // }
 
+  const saveFileData = (cid, shards, certificateAddr, walletAddr) => {
+ 
+    const saveObj = {};
+    saveObj["bride"] = bride.public.name;
+    saveObj["groom"] = groom.public.name;
+    saveObj["secret_bride"] = shards[1];
+    saveObj["secret_groom"] = shards[2];
+    saveObj["public_key_wallet"] = walletAddr;
+    saveObj["storage_account"] = certificateAddr;
+    saveObj["cid"] = cid;
+
+    var blob = new Blob([JSON.stringify(saveObj)], {type: "text/plain;charset=utf-8"});
+
+    saveAs(blob, shards[0]+".txt")
+
+  }
+
   const setGender = (type, newGender, index) => {
     const newState = formState;
     if (index === undefined) {
@@ -230,6 +249,9 @@ const RegistrationForm = ({ connection, wallet, certificateAddr }) => {
           type: "success",
         })
       );
+
+      saveFileData(cid, shards, certificateAddr, wallet.publicKey.toBase58())
+
       dispatch(setCid(cid));
       dispatch(setShards(shards));
       setRegistered(true);

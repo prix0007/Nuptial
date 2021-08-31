@@ -138,8 +138,10 @@ class CertificateService {
       signature,
       "singleGossip"
     );
+    const txnData = await connection.getTransaction(signature);
+    console.log("Transaction Data", txnData);
     console.log("end sendMessage", result);
-    return result;
+    return result
   }
 
   private getFormattedName(name: string): string {
