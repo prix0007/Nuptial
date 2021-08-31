@@ -27,7 +27,7 @@ const AccountCertificate = ({ certificateAddr, getCertificate }) => {
             </figure>
             <div className="media-content ml-2">
               <p className="title is-4">Wallet Connected to Certificate Account</p>
-              <p className="subtitle is-6 is-bold">@{certificateAddr}</p>
+              <a className="subtitle is-6 is-bold has-text-info" href={`https://explorer.solana.com/address/${certificateAddr}?cluster=devnet`} target="_blank" rel="noreferrer">@{certificateAddr}</a>
             </div>
           </div>
           <div className="content">

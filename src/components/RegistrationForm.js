@@ -1,6 +1,6 @@
 import React from "react";
 
-import { saveAs} from 'file-saver';
+import { saveAs } from "file-saver";
 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -12,7 +12,7 @@ import certificateService from "../solana/certificate";
 import { addNotification, setShards, setCid } from "../actions";
 import { useDispatch } from "react-redux";
 
-import { Redirect } from 'react-router-dom';
+import { Redirect } from "react-router-dom";
 
 import { processJSONfromFORM } from "../helpers";
 
@@ -52,7 +52,42 @@ const INIT = {
   year_of_marriage: "",
   place: "San Deigo, Auckland, Australia",
   files: null,
-  errors: null,
+  errors: {
+    bride: {
+      public: {
+        name: "",
+        age: "",
+        gender: "",
+      },
+      private: {
+        identification_no: "",
+      },
+    },
+    groom: {
+      public: {
+        name: "",
+        age: "",
+        gender: "",
+      },
+      private: {
+        identification_no: "",
+      },
+    },
+    witnesses: [
+      {
+        public: {
+          name: "",
+          age: "",
+          gender: "",
+        },
+        private: {
+          identification_no: "",
+        },
+      },
+    ],
+    year_of_marriage: "",
+    place: "",
+  },
 };
 
 const RegistrationForm = ({ connection, wallet, certificateAddr }) => {
@@ -60,6 +95,7 @@ const RegistrationForm = ({ connection, wallet, certificateAddr }) => {
   const [formState, setFormState] = React.useState({ ...INIT });
 
   const [registered, setRegistered] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
 
   const addWitness = () => {
     setFormState({
@@ -70,7 +106,6 @@ const RegistrationForm = ({ connection, wallet, certificateAddr }) => {
           public: {
             name: "",
             age: "",
-            created_on: Date.now(),
             gender: "",
           },
           private: {
@@ -78,6 +113,22 @@ const RegistrationForm = ({ connection, wallet, certificateAddr }) => {
           },
         },
       ],
+      errors: {
+        ...formState.errors,
+        witnesses: [
+          ...formState.errors.witnesses,
+          {
+            public: {
+              name: "",
+              age: "",
+              gender: "",
+            },
+            private: {
+              identification_no: "",
+            },
+          },
+        ],
+      },
     });
   };
 
@@ -129,41 +180,150 @@ const RegistrationForm = ({ connection, wallet, certificateAddr }) => {
     });
   };
 
-  const { bride, groom, year_of_marriage, place, files } = formState;
+  const { bride, groom, year_of_marriage, place, files, witnesses, errors } =
+    formState;
 
-  // const nonNegative = (number) => {
-  //     if(number < 0) return false;
-  //     return true;
-  // }
+  const nonNegative = (number) => {
+    if (number < 0) return false;
+    return true;
+  };
 
-  // const isEmpty = (str) => {
-  //     if(str.trim() === "") return true;
-  //     return false;
-  // }
+  const isEmpty = (str) => {
+    if (str.trim() === "") return true;
+    return false;
+  };
 
-  // const formCheck = () => {
-  //   const errors = {
-  //     bride: {
+  const personCheck = (person) => {
+    const errPerson = {
+      public: {
+        name: "",
+        age: "",
+        gender: "",
+      },
+      private: {
+        identification_no: "",
+      },
+    };
 
-  //     },
-  //     groom: {
+    Object.keys(person.public).forEach((key) => {
+      if (isEmpty(person.public[key])) {
+        errPerson.public[key] = "Field can't be Empty";
+      } else {
+        errPerson.public[key] = "";
+      }
+      if (key === "age") {
+        if (!nonNegative(parseInt(person.public[key])))
+          errPerson.public[key] = "Age can't be Negative";
+      }
+    });
 
-  //     },
-  //     witness: [],
-  //     year_of_marriage: null,
-  //     place: null
-  //   }
+    Object.keys(person.private).forEach((key) => {
+      if (isEmpty(person.private[key])) {
+        errPerson.private[key] = "Identification can't be Empty";
+      } else {
+        errPerson.private[key] = "";
+      }
+    });
 
-  //   // TODO: Form Checking logic here
+    // console.log(errPerson)
 
-  //   setFormState({
-  //     ...formState,
-  //     errors
+    return errPerson;
+  };
+
+  const checkFormNotification = () => {
+    dispatch(
+      addNotification({
+        text: "Check form and fill it Properly to Proceed.",
+        type: "danger",
+      })
+    );
+  };
+
+  // const checkPersonResponse = (person) => {
+  //   console.log(person)
+  //   Object.keys(person.public).forEach((key) => {
+  //     if(!isEmpty(person.public[key])){
+  //       console.log("Inside")
+  //       return false;
+  //     }
+  //     if(key === "age") {
+  //       if(!nonNegative(parseInt(person.public[key])))
+  //         return false;
+  //     }
   //   })
+
+  //   Object.keys(person.private).forEach((key) => {
+  //     if(isEmpty(person.private[key])){
+  //       return false
+  //     }
+  //   })
+
+  //   return true
+
   // }
+
+  const formCheck = () => {
+    const errors = {
+      bride: {
+        public: {
+          name: "",
+          age: "",
+          gender: "",
+        },
+        private: {
+          identification_no: "",
+        },
+      },
+      groom: {
+        public: {
+          name: "",
+          age: "",
+          gender: "",
+        },
+        private: {
+          identification_no: "",
+        },
+      },
+      witnesses: [
+        {
+          public: {
+            name: "",
+            age: "",
+            gender: "",
+          },
+          private: {
+            identification_no: "",
+          },
+        },
+      ],
+      year_of_marriage: "",
+      place: "",
+    };
+
+    // TODO: Form Checking logic here
+
+    errors.bride = personCheck(bride);
+    errors.groom = personCheck(groom);
+    errors.witnesses = witnesses.map((witness) => personCheck(witness));
+
+    setFormState({
+      ...formState,
+      errors,
+    });
+
+    if (isEmpty(year_of_marriage.toString())) {
+      checkFormNotification();
+      return false;
+    }
+    if (isEmpty(place)) {
+      checkFormNotification();
+      return false;
+    }
+
+    return true;
+  };
 
   const saveFileData = (cid, shards, certificateAddr, walletAddr) => {
- 
     const saveObj = {};
     saveObj["bride"] = bride.public.name;
     saveObj["groom"] = groom.public.name;
@@ -173,11 +333,12 @@ const RegistrationForm = ({ connection, wallet, certificateAddr }) => {
     saveObj["storage_account"] = certificateAddr;
     saveObj["cid"] = cid;
 
-    var blob = new Blob([JSON.stringify(saveObj)], {type: "text/plain;charset=utf-8"});
+    var blob = new Blob([JSON.stringify(saveObj)], {
+      type: "text/plain;charset=utf-8",
+    });
 
-    saveAs(blob, shards[0]+".txt")
-
-  }
+    saveAs(blob, shards[0] + ".txt");
+  };
 
   const setGender = (type, newGender, index) => {
     const newState = formState;
@@ -192,6 +353,12 @@ const RegistrationForm = ({ connection, wallet, certificateAddr }) => {
   };
 
   const submitForUpload = async () => {
+    setLoading(true);
+    if (!formCheck()) {
+      setLoading(false);
+      return;
+    }
+
     if (wallet === null) {
       dispatch(
         addNotification({
@@ -199,6 +366,7 @@ const RegistrationForm = ({ connection, wallet, certificateAddr }) => {
           type: "danger",
         })
       );
+      setLoading(false)
       return;
     }
 
@@ -250,7 +418,7 @@ const RegistrationForm = ({ connection, wallet, certificateAddr }) => {
         })
       );
 
-      saveFileData(cid, shards, certificateAddr, wallet.publicKey.toBase58())
+      saveFileData(cid, shards, certificateAddr, wallet.publicKey.toBase58());
 
       dispatch(setCid(cid));
       dispatch(setShards(shards));
@@ -263,10 +431,11 @@ const RegistrationForm = ({ connection, wallet, certificateAddr }) => {
         })
       );
     }
+    setLoading(false);
   };
 
   return (
-    <div className="container pt-4 pb-4">
+    <div className="container p-4">
       {registered && <Redirect to="/" />}
       <h1 className="title mt-4 mb-4">Registration Form</h1>
       <div className="columns">
@@ -288,6 +457,11 @@ const RegistrationForm = ({ connection, wallet, certificateAddr }) => {
                 <i className="fas fa-check fa-xs"></i>
               </span>
             </div>
+            {!isEmpty(errors.bride.public.name) && (
+              <label className="has-text-danger">
+                {errors.bride.public.name}
+              </label>
+            )}
           </div>
           <div className="field">
             <label className="label">Bride's Age</label>
@@ -306,6 +480,11 @@ const RegistrationForm = ({ connection, wallet, certificateAddr }) => {
                 <i className="fas fa-check fa-xs"></i>
               </span>
             </div>
+            {!isEmpty(errors.bride.public.age) && (
+              <label className="has-text-danger">
+                {errors.bride.public.age}
+              </label>
+            )}
           </div>
 
           <div className="field">
@@ -327,6 +506,11 @@ const RegistrationForm = ({ connection, wallet, certificateAddr }) => {
                 <i className="fas fa-signature"></i>
               </span>
             </div>
+            {!isEmpty(errors.bride.private.identification_no) && (
+              <label className="has-text-danger">
+                {errors.bride.private.identification_no}
+              </label>
+            )}
           </div>
         </div>
         <div className="column is-half">
@@ -347,6 +531,11 @@ const RegistrationForm = ({ connection, wallet, certificateAddr }) => {
                 <i className="fas fa-check fa-xs"></i>
               </span>
             </div>
+            {!isEmpty(errors.groom.public.name) && (
+              <label className="has-text-danger">
+                {errors.groom.public.name}
+              </label>
+            )}
           </div>
           <div className="field">
             <label className="label">Groom's Age</label>
@@ -365,6 +554,11 @@ const RegistrationForm = ({ connection, wallet, certificateAddr }) => {
                 <i className="fas fa-check fa-xs"></i>
               </span>
             </div>
+            {!isEmpty(errors.groom.public.age) && (
+              <label className="has-text-danger">
+                {errors.groom.public.age}
+              </label>
+            )}
           </div>
           <div className="field">
             <label className="label">Groom's Identification Number</label>
@@ -385,6 +579,11 @@ const RegistrationForm = ({ connection, wallet, certificateAddr }) => {
                 <i className="fas fa-check fa-xs"></i>
               </span>
             </div>
+            {!isEmpty(errors.groom.private.identification_no) && (
+              <label className="has-text-danger">
+                {errors.groom.private.identification_no}
+              </label>
+            )}
           </div>
         </div>
       </div>
@@ -392,7 +591,7 @@ const RegistrationForm = ({ connection, wallet, certificateAddr }) => {
         <strong>Add a witness</strong>
       </button>
       <div className="columns is-flex is-flex-wrap-wrap	">
-        {formState.witnesses.map((witness, index) => {
+        {witnesses.map((witness, index) => {
           return (
             <div className="column is-half border" key={index}>
               <div className="field">
@@ -414,6 +613,12 @@ const RegistrationForm = ({ connection, wallet, certificateAddr }) => {
                     <i className="fas fa-check fa-xs"></i>
                   </span>
                 </div>
+
+                {!isEmpty(errors.witnesses[index].public.name) && (
+                  <label className="has-text-danger">
+                    {errors.witnesses[index].public.name}
+                  </label>
+                )}
               </div>
               <div className="field">
                 <label className="label">Witness's Age: </label>
@@ -434,6 +639,11 @@ const RegistrationForm = ({ connection, wallet, certificateAddr }) => {
                     <i className="fas fa-check fa-xs"></i>
                   </span>
                 </div>
+                {!isEmpty(errors.witnesses[index].public.age) && (
+                  <label className="has-text-danger">
+                    {errors.witnesses[index].public.age}
+                  </label>
+                )}
               </div>
               <Gender
                 activeGender={witness.public.gender}
@@ -441,6 +651,11 @@ const RegistrationForm = ({ connection, wallet, certificateAddr }) => {
                 idx={index}
                 setGender={setGender}
               />
+              {!isEmpty(errors.witnesses[index].public.gender) && (
+                <label className="has-text-danger">
+                  {errors.witnesses[index].public.gender}
+                </label>
+              )}
               <div className="field">
                 <label className="label">Witness's Identification Number</label>
                 <div className="control has-icons-left has-icons-right">
@@ -466,6 +681,13 @@ const RegistrationForm = ({ connection, wallet, certificateAddr }) => {
                     <i className="fas fa-check fa-xs"></i>
                   </span>
                 </div>
+                {!isEmpty(
+                  errors.witnesses[index].private.identification_no
+                ) && (
+                  <label className="has-text-danger">
+                    {errors.witnesses[index].private.identification_no}
+                  </label>
+                )}
               </div>
             </div>
           );
@@ -486,6 +708,9 @@ const RegistrationForm = ({ connection, wallet, certificateAddr }) => {
             <i className="fas fa-check fa-xs"></i>
           </span>
         </div>
+        {isEmpty(year_of_marriage.toString()) && (
+          <label className="has-text-danger">Enter Date of Marraige</label>
+        )}
       </div>
       <div className="field">
         <label className="label">Place of Getting Married</label>
@@ -504,6 +729,9 @@ const RegistrationForm = ({ connection, wallet, certificateAddr }) => {
             <i className="fas fa-check fa-xs"></i>
           </span>
         </div>
+        {isEmpty(place) && (
+          <label className="has-text-danger">Enter place of Marraige</label>
+        )}
       </div>
 
       <div className="file has-name mb-5">
@@ -530,11 +758,22 @@ const RegistrationForm = ({ connection, wallet, certificateAddr }) => {
               );
             })}
         </label>
+        <span className="tag has-text-info">Optional</span>
       </div>
-      <p className="is-size-6 mb-3">Current Certificate Address: {certificateAddr}</p>
-      <button className="button is-primary" onClick={() => submitForUpload()}>
-        Get Registered
-      </button>
+      {certificateAddr && (
+        <p className="is-size-6 mb-3 breakWord">
+          Current Certificate Address: {certificateAddr}
+        </p>
+      )}
+      {loading ? (
+        <progress className="progress is-medium is-dark" max="100">
+          45%
+        </progress>
+      ) : (
+        <button className="button is-primary" onClick={() => submitForUpload()}>
+          Get Registered
+        </button>
+      )}
     </div>
   );
 };

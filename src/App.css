@@ -74,3 +74,7 @@
 .breakWord {
   word-break: break-all;
 }
+
+.is-visible {
+  display:block;
+}

@@ -3,6 +3,9 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const Navbar = ({ connectWallet, wallet }) => {
+
+  const [isOpen, setOpen] = React.useState(false);
+
   return (
     <nav
       className="navbar is-fixed-top "
@@ -18,21 +21,21 @@ const Navbar = ({ connectWallet, wallet }) => {
           className="navbar-item"
         />
 
-        <a
+        <div
           role="button"
           className="navbar-burger"
           aria-label="menu"
           aria-expanded="false"
           data-target="navbarBasicExample"
-          href="/"
+          onClick={() => setOpen(!isOpen)}
         >
           <span aria-hidden="true"></span>
           <span aria-hidden="true"></span>
           <span aria-hidden="true"></span>
-        </a>
+        </div>
       </div>
 
-      <div id="navbarBasicExample" className="navbar-menu">
+      <div id="navbarBasicExample" className={`navbar-menu ${isOpen && "is-visible "}`}>
         <div className="navbar-start">
           <a className="navbar-item" href="/">
             Home
@@ -55,7 +58,7 @@ const Navbar = ({ connectWallet, wallet }) => {
 
         <div className="navbar-end">
           {wallet !== null ? (
-            <div className="navbar-item">
+            <div className="navbar-item breakWord">
               <strong>{wallet.publicKey.toBase58()}</strong>
             </div>
           ) : (

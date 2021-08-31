@@ -128,9 +128,10 @@ const Certificate = () => {
           setLoading(true);
           fetchData(cid);
         }
-        return <p className="title">Loading../..\ Certificate</p>;
+        return <div><progress className="progress is-danger" max="100">30%</progress>
+        <p className="title">{`Loading.. (><)  ..Certificate`}</p></div>;
       } else {
-        return <div className="columns">{makePublicData()}{renderPrivateData()}</div>;
+        return <div className="columns p-4">{makePublicData()}{renderPrivateData()}</div>;
       }
     } else {
       return (
@@ -187,22 +188,25 @@ const Certificate = () => {
 
   const renderInputView = () => {
     return !isDecrpted && (
-      <div className="is-flex mb-3">
-        <textarea
-          className="textarea is-primary"
-          type="text"
-          placeholder="Enter security shard to view private data."
-          value={inputShard}
-          onChange={(e) => {
-            setInputShard(e.target.value);
-          }}
-        />
-        <button
-          className=" ml-3 button is-primary"
-          onClick={() => tryDecryptingData()}
-        >
-          View Private Data
-        </button>
+      <div className="is-flex is-flex-direction-column p-4">
+        <h4 className="is-size-5">Enter Your Secret to Unlock Private Data</h4>
+        <div className="is-flex is-flex-wrap-wrap	">
+          <textarea
+            className="textarea is-primary"
+            type="text"
+            placeholder="Enter security shard to view private data."
+            value={inputShard}
+            onChange={(e) => {
+              setInputShard(e.target.value);
+            }}
+          />
+          <button
+            className=" ml-3 button is-primary"
+            onClick={() => tryDecryptingData()}
+          >
+            View Private Data
+          </button>
+        </div>
       </div>
     );
   };
@@ -213,10 +217,11 @@ const Certificate = () => {
     if(!certificate) return;
     const { private: priv } = certificate;
     return (
-      isDecrpted &&
-      typeof priv !== "string" && (
+      (isDecrpted &&
+      typeof priv !== "string") ? (
         <div className="is-flex is-flex-direction-column column is-half">
-          <p className="is-size-5 has-text-primary">Private Data in this Certificate</p>
+          
+          <p className="is-size-5 mb-4">Private Data in this Certificate</p>
           <div className="card">
             <div className="card-content">
               <div className="content">
@@ -273,13 +278,12 @@ const Certificate = () => {
             }
           })}
         </div>
-      )
+      ) : renderInputView()
     );
   };
 
   return (
     <div className="container is-flex is-flex-direction-column  is-justify-content-center is-align-items-center	pt-6">
-      {renderInputView()}
       {renderView()}
     </div>
   );
