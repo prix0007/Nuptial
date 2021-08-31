@@ -153,7 +153,8 @@ export const processJSONfromFORM = async (formObj) => {
     // console.log(finalJSON);
 
     console.log("Uploading File to Cloud ... ");
-    const cid = await storeData(finalJSON, shares[0] + ".txt");
+    // const cid = await storeData(finalJSON, shares[0] + ".txt");
+    const cid = await storeData(finalJSON);
 
     console.log("Stored in IPFS with cid:", cid);
 

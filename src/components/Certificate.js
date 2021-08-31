@@ -6,7 +6,7 @@ import isIPFS from "is-ipfs";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
-import { fetchCid } from "../db";
+// import { fetchCid } from "../db";
 import { combineShards } from "../zip";
 import { addNotification, setShards } from "../actions";
 import { decryptPrivateData, getType, decodeBase64 } from "../helpers";
@@ -27,12 +27,31 @@ const Certificate = () => {
   
   const globalShards = useSelector((state) => state.global.shards);
 
+  const getCidData = async (cid, fileName) => {
+    if(!cid || !fileName){
+      dispatch(addNotification({
+        text: "Not Correct URL Format..",
+        type: "danger"
+      }))
+    }
+    const dataUrl = "https://gateway.ipfs.io/ipfs/" + cid + "/" + fileName + ".txt"
+    console.log(dataUrl);
+    const res = await fetch(dataUrl);
+    return res.text()
+  }
+
   const fetchData = async (cid) => {
     // console.log("Fetch Data Triggered");
-    const fetchedData = await fetchCid(cid);
+    // const fetchedData = await fetchCid(cid);
+    // Having error with asyncIterable in Production so using public ipfs nodes to getData
+    // Don't pose an issue as data is encrypted
+  
     // console.log(fetchedData);
-    const plainText = await fetchedData[0].text();
+    // const plainText = await fetchedData[0].text();
     // console.log("Plain Text: ", plainText);
+
+    const plainText = await getCidData(cid, "data");
+    
     // console.log("JSON: ", JSON.parse(plainText));
     const JSONCertificate = JSON.parse(plainText);
     setCertificate({...JSONCertificate});

@@ -36,6 +36,7 @@ export const storeData = async (jsonData, fileName = "data.txt") => {
 async function toWeb3File ({ content, path, cid }) {
     const chunks = []
     for await (const chunk of content()) {
+      
       chunks.push(chunk)
     }
     const file = new File(chunks,toFilenameWithPath(path))
@@ -56,12 +57,7 @@ export const fetchCid = async (cid) => {
     throw new Error(`failed to get ${cid} - [${res.status}] ${res.statusText}`);
   }
 
-  // unpack File objects from the response
-  // const files = await res.files()
-  // console.log("FIles", files);
-  // for (const file of files) {
-  //     console.log(`${file.cid} -- ${file.path} -- ${file.size}`)
-  // }
+
   const files = []
   for await (const entry of res.unixFsIterator()) {
     // console.log(`got unixfs of type ${entry.type}. cid: ${entry.cid} path: ${entry.path}`);
