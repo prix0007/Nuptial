@@ -13,6 +13,7 @@ import Notification from "./components/Notification";
 import Certificate from "./components/Certificate";
 import Home from "./components/Home";
 import AccountCertificate from "./components/AccountCertificate";
+import About from "./components/About";
 
 import { addNotification, setCertificate } from "./actions";
 
@@ -108,6 +109,9 @@ function App() {
             wallet={myWallet}
             certificateAddr={myCertificateAddress}
           />
+        </Route>
+        <Route path="/about">
+          <About />
         </Route>
         <Route path="/">
           {myCertificateAddress ? (
