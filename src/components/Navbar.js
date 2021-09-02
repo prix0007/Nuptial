@@ -3,7 +3,6 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const Navbar = ({ connectWallet, wallet }) => {
-
   const [isOpen, setOpen] = React.useState(false);
 
   return (
@@ -20,6 +19,9 @@ const Navbar = ({ connectWallet, wallet }) => {
           alt="test"
           className="navbar-item"
         />
+        <div className="navbar-item">
+          <p className="is-size-5 has-text-primary">Nuptial</p>
+        </div>
 
         <div
           role="button"
@@ -35,7 +37,10 @@ const Navbar = ({ connectWallet, wallet }) => {
         </div>
       </div>
 
-      <div id="navbarBasicExample" className={`navbar-menu ${isOpen && "is-visible "}`}>
+      <div
+        id="navbarBasicExample"
+        className={`navbar-menu ${isOpen && "is-visible "}`}
+      >
         <div className="navbar-start">
           <a className="navbar-item" href="/">
             Home

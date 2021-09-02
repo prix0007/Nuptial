@@ -1,45 +1,10 @@
-# Marriage Registration on Chain
+# (Nuptial) Marriage Registration on Chain
 
-This Project is build on Solana And ReactJS
+This Project is build on Solana And ReactJS. 
 
-## Available Scripts
-
-In the project directory, you can run:
-
-### `yarn start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
-
-### `yarn build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-
-### `yarn build:program`
-
-Build the smart contract's Object file `.so` file which is ready to be deployed on solana blockchain
-
-### `yarn test:program`
-
-Test the smart contract file which is in dir `/program/src`
-
-
-
-### Additonal Instructions
-
-- Try to test before building the smart contract 
-- Versions on which it is build on
-- Currently depoyed on Solana devnet, so if connection drops try refreshing
+* Project Name: Nuptial
+* Build on Hackathon: Building Out Loud
+* Developer: Prince Anuragi 
 
 ## How it works
 
@@ -81,6 +46,47 @@ Test the smart contract file which is in dir `/program/src`
 - Adjustable Secret Sharing Scheme with custom threshold and total number of secret
 - Automatic reply mails for secrets back to Groom and Bride's Email
 
+
+## Available Scripts
+
+In the project directory, you can run:
+
+### `yarn start`
+
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+
+The page will reload if you make edits.\
+You will also see any lint errors in the console.
+
+### `yarn build`
+
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
+
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
+
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+
+
+### `yarn build:program`
+
+Build the smart contract's Object file `.so` file which is ready to be deployed on solana blockchain
+
+### `yarn test:program`
+
+Test the smart contract file which is in dir `/program/src`
+
+
+
+### Additonal Instructions
+
+- Try to test before building the smart contract 
+- Versions on which it is build on
+- Currently depoyed on Solana devnet, so if connection drops try refreshing
+
+
 ### Additional Instructions
-- If you have any issue related to project while trying, create a PR on Github @[](On Chain Marriage-Solana) 
+- If you have any issue related to project while trying, create a PR on Github @[On Chain Marriage-Solana](https://github.com/prix0007/OnChain_Marriage)
 
